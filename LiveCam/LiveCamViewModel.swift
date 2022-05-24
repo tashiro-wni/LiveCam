@@ -8,15 +8,19 @@
 import Foundation
 import UIKit
 
+@MainActor
 final class LiveCamViewModel: ObservableObject {
     @Published private(set) var cameraData: LiveCamData.Camera?
     @Published private(set) var images: [String: UIImage] = [:]
     @Published var hasError = false
 
-    let dateFormatter: DateFormatter = {
+    private let urlString = "https://weathernews.jp/ip/livecam_json.cgi?pno=410000116"
+
+    private let dateFormatter: DateFormatter = {
         let dateFormatter = DateFormatter()
         dateFormatter.dateStyle = .medium
         dateFormatter.timeStyle = .medium
+        dateFormatter.calendar = Calendar(identifier: .gregorian)
         dateFormatter.locale = Locale(identifier: "ja_JP")
         dateFormatter.timeZone = TimeZone(identifier: "JST")
         return dateFormatter
@@ -35,17 +39,13 @@ final class LiveCamViewModel: ObservableObject {
         Task {
             do {
                 // json 読み込み
-                let camData = try await loadJson()
-                DispatchQueue.main.async { [weak self] in
-                    self?.cameraData = camData
-                }
+                let camData = try await loadJson(urlString: urlString)
+                cameraData = camData
 
                 // 画像読み込み
                 for item in camData.live_photo {
                     let image = try await loadImage(url: item.url)
-                    DispatchQueue.main.async { [weak self] in
-                        self?.images[item.time] = image
-                    }
+                    images[item.time] = image
                 }
             } catch {
                 hasError = true
@@ -53,8 +53,7 @@ final class LiveCamViewModel: ObservableObject {
         }
     }
 
-    func loadJson() async throws -> LiveCamData.Camera {
-        let urlString = "https://weathernews.jp/ip/livecam_json.cgi?pno=410000116"
+    private func loadJson(urlString: String) async throws -> LiveCamData.Camera {
         guard let url = URL(string: urlString) else { throw LoadError.wrongUrl }
 
         let (data, _) = try await URLSession.shared.data(from: url)
@@ -64,7 +63,7 @@ final class LiveCamViewModel: ObservableObject {
         return camData.cam
     }
 
-    func loadImage(url: URL) async throws -> UIImage {
+    private func loadImage(url: URL) async throws -> UIImage {
         let (data, _) = try await URLSession.shared.data(from: url)
         guard let image = UIImage(data: data) else {
             throw LoadError.parseError
@@ -83,7 +82,6 @@ struct LiveCamData: Decodable {
     let cam: Camera
 
     struct Camera: Decodable {
-        let photo: URL
         let place: String  // カメラ名
         let precipitation: ObsData  // 降水量
         let temperature: ObsData    // 気温
@@ -93,12 +91,12 @@ struct LiveCamData: Decodable {
         struct ObsData: Decodable {
             let value: Double
             let unit: String
-            let direction: Int?
+            let direction: Int?  // 風向(16方位)
         }
 
         struct Photo: Decodable {
-            let url: URL
-            let time: String
+            let url: URL      // 画像URL
+            let time: String  // 画像時刻 (unix_time)
         }
     }
 }

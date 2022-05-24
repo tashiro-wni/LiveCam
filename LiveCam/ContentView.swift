@@ -11,18 +11,22 @@ struct ContentView: View {
     @StateObject var viewModel = LiveCamViewModel()
     
     var body: some View {
-        if let cameraData = viewModel.cameraData {
-            VStack {
+        VStack {
+            if let cameraData = viewModel.cameraData {
                 Text(cameraData.place)
                 if let latestTime = viewModel.latestTime, let image = viewModel.images[latestTime] {
                     Text(viewModel.dateText(latestTime))
                     Image(uiImage: image)
                 } else {
-                    Text("Image loading...")
+                    Text("画像読み込み中...")
                 }
+            } else {
+                Text("読み込み中...")
             }
-        } else {
-            Text("Loading...")
+        }
+        .alert(isPresented: $viewModel.hasError) {
+            // エラー時にはAlertを表示する
+            Alert(title: Text("データが読み込めませんでした。"))
         }
     }
 }
