@@ -28,24 +28,6 @@ struct ContentView: View {
                 } else {
                     Text("画像読み込み中...")
                 }
-
-                // 画像下の表
-                VStack(spacing: 0) {
-                    Label(key: " 場　所：", value: cameraData.place)
-                        .background(Color(white: 0.95))
-                    HStack {
-                        Label(key: " 気　温：", value: String(cameraData.temperature.value) + cameraData.temperature.unit)
-                            .background(Color.white)
-                        Label(key: " 降水量：", value: String(cameraData.precipitation.value) + cameraData.precipitation.unit)
-                            .background(Color.white)
-                    }
-                    HStack {
-                        Label(key: " 風　向：", value: cameraData.windDirectionString)
-                            .background(Color.white)
-                        Label(key: " 風　速：", value: String(cameraData.wind.value) + cameraData.wind.unit)
-                            .background(Color.white)
-                    }
-                }
             } else {
                 Text("読み込み中...")
             }
@@ -55,23 +37,6 @@ struct ContentView: View {
             // エラー時にはAlertを表示する
             Alert(title: Text("データが読み込めませんでした。"))
         }
-    }
-}
-
-struct Label: View {
-    let key: String
-    let value: String
-
-    var body: some View {
-        HStack {
-            Text(key)
-                .foregroundColor(Color.blue)
-            Text(value)
-                .foregroundColor(Color.black)
-            Spacer()
-        }
-        .frame(maxHeight: 30)
-        .border(Color.gray)
     }
 }
 
