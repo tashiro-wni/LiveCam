@@ -35,6 +35,10 @@ final class LiveCamViewModel: ObservableObject {
     }
 
     init() {
+        load()
+    }
+
+    private func load() {
         Task {
             do {
                 // json 読み込み
@@ -99,8 +103,8 @@ struct LiveCamData: Decodable {
         }
 
         var windDirectionString: String {
-            let list = ["無風", "北北東", "北東", "東北東", "東", "東南東", "南東", "南南東", "南",
-                        "南南西", "南西", "西南西", "西", "西北西", "北西", "北北西", "北" ]
+            let list = [ "無風", "北北東", "北東", "東北東", "東", "東南東", "南東", "南南東", "南",
+                         "南南西", "南西", "西南西", "西", "西北西", "北西", "北北西", "北" ]
             guard let dir = wind.direction, dir >= 0, dir < list.count else { return "" }
             return list[dir]
         }
