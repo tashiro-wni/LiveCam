@@ -18,8 +18,7 @@ final class LiveCamViewModel: ObservableObject {
 
     private let dateFormatter: DateFormatter = {
         let dateFormatter = DateFormatter()
-        dateFormatter.dateStyle = .medium
-        dateFormatter.timeStyle = .medium
+        dateFormatter.dateFormat = "M月d日(E) H:mm"
         dateFormatter.calendar = Calendar(identifier: .gregorian)
         dateFormatter.locale = Locale(identifier: "ja_JP")
         dateFormatter.timeZone = TimeZone(identifier: "JST")
@@ -97,6 +96,13 @@ struct LiveCamData: Decodable {
         struct Photo: Decodable {
             let url: URL      // 画像URL
             let time: String  // 画像時刻 (unix_time)
+        }
+
+        var windDirectionString: String {
+            let list = ["無風", "北北東", "北東", "東北東", "東", "東南東", "南東", "南南東", "南",
+                        "南南西", "南西", "西南西", "西", "西北西", "北西", "北北西", "北" ]
+            guard let dir = wind.direction, dir >= 0, dir < list.count else { return "" }
+            return list[dir]
         }
     }
 }
