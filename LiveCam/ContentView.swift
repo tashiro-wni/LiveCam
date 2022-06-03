@@ -17,10 +17,28 @@ struct ContentView: View {
                 Text(cameraData.place)
                     .font(.title3)
                     .fontWeight(.bold)
-                if let latestTime = viewModel.latestTime, let image = viewModel.images[latestTime] {
-                    // 画像の時刻
-                    Text(viewModel.dateText(latestTime))
-                        .fontWeight(.bold)
+                if let currentTime = viewModel.currentTime, let image = viewModel.images[currentTime] {
+                    HStack(spacing: 20) {
+                        // 画像の時刻
+                        Text(viewModel.dateText(currentTime))
+                            .fontWeight(.bold)
+
+                        // 再生・停止ボタン
+                        Button(action: {
+                            viewModel.toggleTimer()
+                        }, label: {
+                            if viewModel.isAnimating {
+                                Image(systemName: "pause.fill")
+                            } else {
+                                Image(systemName: "play.fill")
+                           }
+                        })
+                        .padding(5)
+                        .overlay(RoundedRectangle(cornerRadius: 5)
+                            .stroke(Color.blue, lineWidth: 1))
+                        .background(Color.white)
+                    }
+
                     // 画像
                     Image(uiImage: image)
                         .resizable()
@@ -30,22 +48,22 @@ struct ContentView: View {
                 }
 
                 // 画像下の表
-                 VStack(spacing: 0) {
-                     Label(key: " 場　所：", value: cameraData.place)
-                         .background(Color(white: 0.95))
-                     HStack {
-                         Label(key: " 気　温：", value: String(cameraData.temperature.value) + cameraData.temperature.unit)
-                             .background(Color.white)
-                         Label(key: " 降水量：", value: String(cameraData.precipitation.value) + cameraData.precipitation.unit)
-                             .background(Color.white)
-                     }
-                     HStack {
-                         Label(key: " 風　向：", value: cameraData.windDirectionString)
-                             .background(Color.white)
-                         Label(key: " 風　速：", value: String(cameraData.wind.value) + cameraData.wind.unit)
-                             .background(Color.white)
-                     }
-                 }
+                VStack(spacing: 0) {
+                    Label(key: " 場　所：", value: cameraData.place)
+                        .background(Color(white: 0.95))
+                    HStack {
+                        Label(key: " 気　温：", value: String(cameraData.temperature.value) + cameraData.temperature.unit)
+                            .background(Color.white)
+                        Label(key: " 降水量：", value: String(cameraData.precipitation.value) + cameraData.precipitation.unit)
+                            .background(Color.white)
+                    }
+                    HStack {
+                        Label(key: " 風　向：", value: cameraData.windDirectionString)
+                            .background(Color.white)
+                        Label(key: " 風　速：", value: String(cameraData.wind.value) + cameraData.wind.unit)
+                            .background(Color.white)
+                    }
+                }
             } else {
                 Text("読み込み中...")
             }

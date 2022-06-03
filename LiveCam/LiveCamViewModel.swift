@@ -11,9 +11,12 @@ import UIKit
 @MainActor
 final class LiveCamViewModel: ObservableObject {
     @Published private(set) var cameraData: LiveCamData.Camera?
-    @Published private(set) var images: [String: UIImage] = [:]
+    private(set) var images: [String: UIImage] = [:]
+    @Published private(set) var index = 0
+    @Published var isAnimating = false
     @Published var hasError = false
 
+    private var timer: Timer?
     private let urlString = "https://weathernews.jp/ip/livecam_json.cgi?pno=410000116"
 
     private let dateFormatter: DateFormatter = {
@@ -25,8 +28,9 @@ final class LiveCamViewModel: ObservableObject {
         return dateFormatter
     }()
 
-    var latestTime: String? {
-        images.keys.sorted(by: >).first
+    var currentTime: String? {
+        guard !images.isEmpty, index < images.count else { return nil }
+        return images.keys.sorted(by: <)[index]
     }
 
     func dateText(_ key: String) -> String {
@@ -36,6 +40,21 @@ final class LiveCamViewModel: ObservableObject {
 
     init() {
         load()
+    }
+
+    // アニメーションの開始・停止
+    func toggleTimer() {
+        if timer != nil {
+            isAnimating = false
+            timer?.invalidate()
+            timer = nil
+        } else {
+            isAnimating = true
+            timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] timer in
+                guard let self = self, !self.images.isEmpty else { return }
+                self.index = (self.index + 1) % self.images.count
+            }
+        }
     }
 
     private func load() {
@@ -50,6 +69,9 @@ final class LiveCamViewModel: ObservableObject {
                     let image = try await loadImage(url: item.url)
                     images[item.time] = image
                 }
+
+                // アニメーション開始
+                toggleTimer()
             } catch {
                 hasError = true
             }
