@@ -18,10 +18,11 @@ struct ContentView: View {
                     .font(.title3)
                     .fontWeight(.bold)
                 if let currentTime = viewModel.currentTime, let image = viewModel.images[currentTime] {
-                    HStack(spacing: 20) {
+                    HStack(spacing: 10) {
                         // 画像の時刻
                         Text(viewModel.dateText(currentTime))
                             .fontWeight(.bold)
+                            .frame(width: 160)
 
                         // 再生・停止ボタン
                         Button(action: {
@@ -31,12 +32,13 @@ struct ContentView: View {
                                 Image(systemName: "pause.fill")
                             } else {
                                 Image(systemName: "play.fill")
-                           }
+                            }
                         })
                         .padding(5)
+                        .background(Color.white)
+                        .cornerRadius(5)
                         .overlay(RoundedRectangle(cornerRadius: 5)
                             .stroke(Color.blue, lineWidth: 1))
-                        .background(Color.white)
                     }
 
                     // 画像
