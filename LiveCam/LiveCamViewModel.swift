@@ -13,7 +13,7 @@ final class LiveCamViewModel: ObservableObject {
     @Published private(set) var cameraData: LiveCamData.Camera?
     private(set) var images: [String: UIImage] = [:]
     @Published private(set) var index = 0
-    @Published var isAnimating = false
+    @Published private(set) var isAnimating = false
     @Published var hasError = false
 
     private var timer: Timer?
