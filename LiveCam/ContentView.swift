@@ -90,6 +90,7 @@ struct Label: View {
                 .foregroundColor(Color.black)
             Spacer()
         }
+        .minimumScaleFactor(0.7)
         .frame(maxHeight: 30)
         .border(Color.gray)
     }
