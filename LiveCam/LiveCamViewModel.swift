@@ -7,6 +7,7 @@
 
 import Foundation
 import UIKit
+import Combine
 
 @MainActor
 final class LiveCamViewModel: ObservableObject {
@@ -16,7 +17,7 @@ final class LiveCamViewModel: ObservableObject {
     @Published private(set) var isAnimating = false
     @Published var hasError = false
 
-    private var timer: Timer?
+    private var cancellable: AnyCancellable?
     private let urlString = "https://weathernews.jp/ip/livecam_json.cgi?pno=410000116"
 
     private let dateFormatter: DateFormatter = {
@@ -44,16 +45,17 @@ final class LiveCamViewModel: ObservableObject {
 
     // アニメーションの開始・停止
     func toggleTimer() {
-        if timer != nil {
+        if isAnimating {
             isAnimating = false
-            timer?.invalidate()
-            timer = nil
+            cancellable?.cancel()
         } else {
+            guard !images.isEmpty else { return }
             isAnimating = true
-            timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] timer in
-                guard let self = self, !self.images.isEmpty else { return }
-                self.index = (self.index + 1) % self.images.count
-            }
+            cancellable = Timer.publish(every: 0.5, on: .main, in: .common)
+                .autoconnect()
+                .sink { [self] _ in
+                    index = (index + 1) % images.count
+                }
         }
     }
 
